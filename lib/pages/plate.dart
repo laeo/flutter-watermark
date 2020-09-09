@@ -5,9 +5,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_size_getter/image_size_getter.dart';
+import 'package:watersec/lib/painter/ImagePainter.dart' as painter;
+import 'package:watersec/lib/watermark/watermark.dart';
 import 'package:path/path.dart' as path;
-import 'dart:math' as math;
 
 class Plate extends StatefulWidget {
   final File image;
@@ -20,19 +20,24 @@ class Plate extends StatefulWidget {
 
 class _PlateState extends State<Plate> {
   final _content = TextEditingController();
-  final GlobalKey _repaintKey = GlobalKey();
 
   String text = "";
-  double fontSize = 22;
+  double fontSize = 12;
+  double fontOpacity = 0.12;
+  int textPadding = 2;
+
+  Future<ui.Image> _image;
 
   @override
   void initState() {
     super.initState();
     _content.addListener(() {
       setState(() {
-        text = _content.value.text;
+        text = _content.text;
       });
     });
+
+    _image = _retrieveImage();
   }
 
   @override
@@ -41,60 +46,71 @@ class _PlateState extends State<Plate> {
     super.dispose();
   }
 
+  Future<ui.Image> _retrieveImage() async {
+    var codec = await ui.instantiateImageCodec(widget.image.readAsBytesSync());
+    var frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
   @override
   Widget build(BuildContext context) {
-    var size = ImageSizGetter.getSize(widget.image);
-    var ratio = MediaQuery.of(context).devicePixelRatio;
-    // calc size in dp.
-    var w = size.width / ratio / 5;
-    var h = size.height / ratio / 5;
-    print(w);
-    print(h);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('编辑'),
       ),
       body: SingleChildScrollView(
+        primary: true,
         padding: EdgeInsets.all(12),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            RepaintBoundary(
-              key: _repaintKey,
-              child: Container(
-                width: w,
-                height: h,
-                decoration: BoxDecoration(color: Colors.black12),
-                clipBehavior: Clip.hardEdge,
-                child: Stack(
-                  overflow: Overflow.clip,
-                  children: [
-                    Image.file(widget.image,
-                        fit: BoxFit.cover, width: w, height: h),
-                    SizedBox(
-                      height: math.max(w, h) * 2,
-                      width: math.max(w, h) * 2,
-                      child: Transform.rotate(
-                        angle: -math.pi / 4,
-                        child: Text(
-                          (text + '  ') * (w * h * 2 ~/ (fontSize * fontSize)),
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            color: Colors.black12,
-                          ),
-                          maxLines: null,
+            FutureBuilder(
+              future: _image,
+              builder:
+                  (BuildContext context, AsyncSnapshot<ui.Image> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  double ratio = snapshot.data.height / snapshot.data.width;
+                  return LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return Container(
+                        width: constraints.maxWidth,
+                        height: constraints.maxWidth * ratio,
+                        child: CustomPaint(
+                          painter: painter.ImagePainter(
+                              image: snapshot.data,
+                              text: text,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                color: Color.fromRGBO(0, 0, 0, fontOpacity),
+                              ),
+                              space: textPadding),
+                          willChange: true,
                         ),
-                      ),
+                      );
+                    },
+                  );
+                } else {
+                  return Container(
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
-                  ],
-                ),
-              ),
+                  );
+                }
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Text('水印内容'),
             ),
             TextField(
               controller: _content,
-              decoration: InputDecoration(labelText: '水印文本'),
             ),
-            Text('字体大小'),
+            Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Text('字体大小'),
+            ),
             Slider(
                 value: fontSize,
                 min: 8,
@@ -106,9 +122,39 @@ class _PlateState extends State<Plate> {
                     fontSize = value.roundToDouble();
                   });
                 }),
+            Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Text('水印透明度'),
+            ),
+            Slider(
+                value: fontOpacity * 100,
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: '$fontOpacity',
+                onChanged: (value) {
+                  setState(() {
+                    fontOpacity = value / 100;
+                  });
+                }),
+            Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Text('水印间距'),
+            ),
+            Slider(
+                value: textPadding.roundToDouble(),
+                min: 0,
+                max: 10,
+                divisions: 10,
+                label: '$textPadding',
+                onChanged: (value) {
+                  setState(() {
+                    textPadding = value.round();
+                  });
+                }),
             RaisedButton.icon(
               onPressed: _takeSnapshot,
-              icon: Icon(Icons.camera_alt),
+              icon: Icon(Icons.save_alt),
               label: Text('保存'),
               color: Theme.of(context).primaryColor,
               textColor: Theme.of(context).primaryTextTheme.button.color,
@@ -120,14 +166,28 @@ class _PlateState extends State<Plate> {
   }
 
   void _takeSnapshot() async {
-    RenderRepaintBoundary boundary =
-        _repaintKey.currentContext.findRenderObject();
-    ui.Image out = await boundary.toImage(pixelRatio: 5.0);
-    ByteData data = await out.toByteData(format: ui.ImageByteFormat.png);
+    ui.PictureRecorder recorder = ui.PictureRecorder();
+    Canvas canvas = Canvas(recorder);
+    ui.Image image = await _retrieveImage();
+    Watermark.draw(
+        canvas,
+        image,
+        text,
+        TextStyle(fontSize: fontSize, color: Colors.black12),
+        textPadding,
+        Size(image.width.roundToDouble(), image.height.roundToDouble()));
+    ui.Image pic =
+        await recorder.endRecording().toImage(image.width, image.height);
+    ByteData data = await pic.toByteData(format: ui.ImageByteFormat.png);
 
-    var name = path.basenameWithoutExtension(widget.image.path) + '_marked.png';
-    await ImageGallerySaver.saveImage(data.buffer.asUint8List(),
-        quality: 100, name: name);
-    Fluttertoast.showToast(msg: '已保存到相册');
+    var savedAs = path.basenameWithoutExtension(widget.image.path) + '.png';
+
+    ImageGallerySaver.saveImage(data.buffer.asUint8List(),
+        quality: 100, name: savedAs);
+
+    pic.dispose();
+    image.dispose();
+
+    Fluttertoast.showToast(msg: '已保存到相册中：' + savedAs);
   }
 }
