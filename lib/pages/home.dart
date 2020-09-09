@@ -12,42 +12,63 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('水印安全'),
-      ),
-      body: Container(
-        child: Center(
-          child: GestureDetector(
-            onTap: () async {
-              final picked = await picker.getImage(source: ImageSource.gallery);
-              final image = File(picked.path);
-              if (ImageSizGetter.isJpg(image) || ImageSizGetter.isPng(image)) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => Plate(image: image)));
-              } else {
-                Fluttertoast.showToast(msg: '图片只支持 JPG 和 PNG 两种格式哟');
-              }
-            },
-            child: Container(
-              width: 180,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              child: Center(
-                child: Text(
-                  '点击选择图片',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Center(
+              child: Text(
+                '水印',
+                style: TextStyle(
+                  fontSize: 120,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
-        ),
+          Expanded(
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    final picked =
+                        await picker.getImage(source: ImageSource.gallery);
+                    final image = File(picked.path);
+                    if (ImageSizGetter.isJpg(image) ||
+                        ImageSizGetter.isPng(image)) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Plate(image: image)));
+                    } else {
+                      Fluttertoast.showToast(msg: '图片只支持 JPG 和 PNG 两种格式哟');
+                    }
+                  },
+                  child: Container(
+                    width: 180,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '点击选择图片',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text('说明：本软件为开源软件，无权限要求，全程本地操作，不联网，请放心使用。'),
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
