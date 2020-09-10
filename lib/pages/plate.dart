@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:r_album/r_album.dart';
 import 'package:watersec/lib/painter/ImagePainter.dart' as painter;
 import 'package:watersec/lib/watermark/watermark.dart';
-import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as path;
 
 class Plate extends StatefulWidget {
   final File image;
@@ -182,20 +182,12 @@ class _PlateState extends State<Plate> {
         await recorder.endRecording().toImage(image.width, image.height);
     ByteData data = await pic.toByteData(format: ui.ImageByteFormat.png);
 
-    var savedAs = path.basenameWithoutExtension(widget.image.path) + '.png';
-
     if (await Permission.storage.request().isGranted) {
-      ImageGallerySaver.saveImage(data.buffer.asUint8List(),
-              quality: 100, name: savedAs)
-          .then((value) {
-        pic.dispose();
-        image.dispose();
-
-        Fluttertoast.showToast(msg: '已保存到相册中：' + savedAs);
-      }).catchError((e) {
-        print(e);
-        Fluttertoast.showToast(msg: '保存失败，请检查是否授权存储权限');
-      });
+      Directory doc = await path.getApplicationDocumentsDirectory();
+      File tmp = File('${doc.path}/_watering.png');
+      tmp.writeAsBytesSync(data.buffer.asUint8List());
+      await RAlbum.saveAlbum('watermark', [tmp.path]);
+      Fluttertoast.showToast(msg: '已保存到相册中');
     }
   }
 }

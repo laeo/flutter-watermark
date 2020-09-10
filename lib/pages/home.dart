@@ -1,14 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 import 'package:watersec/pages/plate.dart';
 
 class HomePage extends StatelessWidget {
-  final picker = ImagePicker();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +17,10 @@ class HomePage extends StatelessWidget {
               child: Text(
                 '水印',
                 style: TextStyle(
-                  fontSize: 120,
-                  fontWeight: FontWeight.bold,
-                ),
+                    fontSize: 180,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "HuangYouTi",
+                    letterSpacing: 40),
               ),
             ),
           ),
@@ -31,8 +29,8 @@ class HomePage extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    final picked =
-                        await picker.getImage(source: ImageSource.gallery);
+                    final picked = await ImagePickerSaver.pickImage(
+                        source: ImageSource.gallery);
                     final image = File(picked.path);
                     if (ImageSizGetter.isJpg(image) ||
                         ImageSizGetter.isPng(image)) {
