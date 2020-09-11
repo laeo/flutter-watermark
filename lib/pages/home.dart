@@ -31,6 +31,9 @@ class HomePage extends StatelessWidget {
                   onTap: () async {
                     final picked = await ImagePicker()
                         .getImage(source: ImageSource.gallery);
+                    if (picked == null) {
+                      return;
+                    }
                     final image = File(picked.path);
                     if (ImageSizGetter.isJpg(image) ||
                         ImageSizGetter.isPng(image)) {
