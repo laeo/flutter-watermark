@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:r_album/r_album.dart';
 import 'package:watersec/lib/painter/ImagePainter.dart' as painter;
 import 'package:watersec/lib/watermark/watermark.dart';
 import 'package:path_provider/path_provider.dart' as path;
@@ -184,10 +184,15 @@ class _PlateState extends State<Plate> {
 
     if (await Permission.storage.request().isGranted) {
       Directory doc = await path.getApplicationDocumentsDirectory();
-      File tmp = File('${doc.path}/_watering.png');
+      File tmp = File('${doc.path}/watering.png');
       tmp.writeAsBytesSync(data.buffer.asUint8List());
-      await RAlbum.saveAlbum('watermark', [tmp.path]);
-      Fluttertoast.showToast(msg: '已保存到相册中');
+      await GallerySaver.saveImage(tmp.path, albumName: 'watermark')
+          .then((value) {
+        print(value);
+        Fluttertoast.showToast(msg: '已保存到相册中');
+      }).catchError((e) {
+        print(e);
+      });
     }
   }
 }

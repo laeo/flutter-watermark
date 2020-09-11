@@ -97,6 +97,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.5"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.8"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -114,6 +121,29 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.0.4"
+  gallery_saver:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: e58e1c6e5813aa82e2221e829c9e2634886b1ec1
+      url: "https://github.com/tattn/gallery_saver.git"
+    source: git
+    version: "2.0.1"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.12.2"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.4"
   image:
     dependency: transitive
     description:
@@ -121,13 +151,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.14"
-  image_picker_saver:
+  image_picker:
     dependency: "direct main"
     description:
-      name: image_picker_saver
+      name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.6.7+7"
+  image_picker_platform_interface:
+    dependency: transitive
+    description:
+      name: image_picker_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   image_size_getter:
     dependency: "direct main"
     description:
@@ -198,6 +235,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  pedantic:
+    dependency: transitive
+    description:
+      name: pedantic
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.9.0"
   permission_handler:
     dependency: "direct main"
     description:
@@ -240,13 +284,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.13"
-  r_album:
-    dependency: "direct main"
-    description:
-      name: r_album
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
   rename:
     dependency: "direct dev"
     description:
