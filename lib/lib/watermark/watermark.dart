@@ -22,8 +22,8 @@ class Watermark {
     double rectSize = math.pow(dimension, 2);
     // 根据面积与字符大小计算文本重复次数
     int textRepeating =
-        ((rectSize / math.pow(style.fontSize, 2)) / (text.length + padding))
-            .round(); // text.length + 1 是因为要添加个空格字符
+        ((rectSize / math.pow(style.fontSize, 2) * 2) / (text.length + padding))
+            .round(); // text.length + padding 是因为要添加个空格字符
 
     math.Point pivotPoint = math.Point(dimension / 2, dimension / 2);
     canvas.translate(pivotPoint.x, pivotPoint.y);
