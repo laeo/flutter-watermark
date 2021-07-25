@@ -153,13 +153,10 @@ class _PlateState extends State<Plate> {
                     textPadding = value.round();
                   });
                 }),
-            RaisedButton.icon(
+            ElevatedButton.icon(
               onPressed: _takeSnapshot,
               icon: Icon(Icons.save_alt),
               label: Text('保存'),
-              color: Theme.of(context).primaryColor,
-              textColor: Colors.white,
-              padding: EdgeInsets.all(16),
             ),
           ],
         ),

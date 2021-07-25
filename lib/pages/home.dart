@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 import 'package:watersec/pages/plate.dart';
 
@@ -30,13 +31,13 @@ class HomePage extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     final picked = await ImagePicker()
-                        .getImage(source: ImageSource.gallery);
+                        .pickImage(source: ImageSource.gallery);
                     if (picked == null) {
                       return;
                     }
                     final image = File(picked.path);
-                    if (ImageSizGetter.isJpg(image) ||
-                        ImageSizGetter.isPng(image)) {
+                    if (ImageSizeGetter.isJpg(FileInput(image)) ||
+                        ImageSizeGetter.isPng(FileInput(image))) {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => Plate(image: image)));
                     } else {
